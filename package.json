@@ -1,0 +1,35 @@
+{
+  "name": "react-r",
+  "version": "1.0.0",
+  "description": "JSX-like syntax for React written in plain JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drabinowitz/react-r"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "drabinowitz <dmitrirabinowitz+code@gmail.com> (http://www.dmitrirabinowitz.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/drabinowitz/react-r/issues"
+  },
+  "homepage": "https://github.com/drabinowitz/react-r",
+  "dependencies": {
+    "gulp": "^3.8.10",
+    "gulp-shell": "^0.2.11",
+    "gulp-watch": "^4.1.0",
+    "jest": "^0.1.37",
+    "jest-cli": "^0.2.1",
+    "react": "^0.12.2"
+  },
+  "jest": {
+    "unmockedModulePathPatterns": [
+      "node_modules/react/"
+    ]
+  }
+}
