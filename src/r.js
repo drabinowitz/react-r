@@ -9,7 +9,13 @@ module.exports = function (el) {
   }
   if (arguments.length === 1) {
     return React.createElement(el, null);
+  } else {
+    var propsChildrenOrText = arguments[1];
+    if (typeof propsChildrenOrText === 'string') {
+      return React.createElement(el, null, propsChildrenOrText);
+    } else if (typeof propsChildrenOrText === 'object') {
+      return React.createElement(el, propsChildrenOrText);
+    }
   }
-  return React.createElement.apply(React, arguments);
 };
 
