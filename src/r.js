@@ -13,7 +13,14 @@ var checkIfValidClosingTag = function (tag, isSelfClosing) {
   }
 };
 
-var r = function (el, propsOrClosingTag, elClosingTag) {
+var r = function (composition) {
+  composition(h, t);
+  return r.compose();
+};
+
+var components = [];
+
+var h = function (el, propsOrClosingTag, elClosingTag) {
   var props = null;
   var closingTag;
   var trimmedEl;
@@ -32,32 +39,38 @@ var r = function (el, propsOrClosingTag, elClosingTag) {
   if (typeof el === 'string') {
     trimmedEl = el.trim();
     if (trimmedEl[0] === '/') {
-      return {
+      components.push({
         el: null,
         closingTag: el
-      };
+      });
+      return;
     } else if (trimmedEl[trimmedEl.length - 1] === '/') {
       closingTag = el;
       el = trimmedEl.substr(0, trimmedEl.length - 1).trim();
     }
   }
 
-  return {
+  components.push({
     el: el,
     props: props,
     closingTag: closingTag
-  };
+  });
+};
+
+var t = function (text) {
+  components.push(text);
 };
 
 var isOutermostInvocation = true;
 var currentIndex = 0;
 var reactElementToReturn = null;
 
-var composeCleanup = function (argumentsLength) {
-  invariant(currentIndex === argumentsLength, INVALID_NUMBER_OF_ARGUMENTS);
+var composeCleanup = function (componentsLength) {
+  invariant(currentIndex === componentsLength, INVALID_NUMBER_OF_ARGUMENTS);
   isOutermostInvocation = true;
   currentIndex = 0;
   reactElementToReturn = null;
+  components = [];
 };
 
 r.compose = function () {
@@ -71,11 +84,11 @@ r.compose = function () {
   }
 
   var children;
-  var argumentsLength = arguments.length;
+  var componentsLength = components.length;
   var reactElement;
   var elementOrString;
-  while (currentIndex < argumentsLength) {
-    elementOrString = arguments[currentIndex];
+  while (currentIndex < componentsLength) {
+    elementOrString = components[currentIndex];
     currentIndex++;
 
     if (typeof elementOrString === 'string') {
@@ -87,7 +100,7 @@ r.compose = function () {
 
       reactElement = React.createElement(elementOrString.el, elementOrString.props);
       if (setOutermostInvocation) {
-        composeCleanup(argumentsLength);
+        composeCleanup(componentsLength);
         return reactElement;
       } else {
         children.push(reactElement);
@@ -95,10 +108,10 @@ r.compose = function () {
 
     } else if (elementOrString.el) {
 
-      reactElement = React.createElement.apply(React, [].concat(elementOrString.el, elementOrString.props, r.compose.apply(r, arguments)));
+      reactElement = React.createElement.apply(React, [].concat(elementOrString.el, elementOrString.props, r.compose()));
       if (setOutermostInvocation) {
-        invariant(arguments[currentIndex - 1].closingTag, INVALID_CLOSING_TAG_COUNT);
-        composeCleanup(argumentsLength);
+        invariant(components[currentIndex - 1].closingTag, INVALID_CLOSING_TAG_COUNT);
+        composeCleanup(componentsLength);
         return reactElement;
       } else {
         children.push(reactElement);
