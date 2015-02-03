@@ -1,7 +1,7 @@
 jest.dontMock('../r');
 
 describe('r', function () {
-  var r, React, mockProps, mockReturn, mockReactClass;
+  var r, React, mockProps, mockReactClass, mockReactElement;
 
   beforeEach(function () {
     r = require('../r');
@@ -11,9 +11,9 @@ describe('r', function () {
         return React.createElement('div', null);
       }
     });
+    mockReactElement = React.createElement(mockReactClass, null);
     React.createElement = jest.genMockFunction();
     mockProps = {};
-    mockReturn = {};
   });
 
   it('should invoke React.createElement with a single element', function () {
@@ -95,7 +95,7 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with an element with a child element', function () {
-    React.createElement.mockReturnValueOnce(mockReturn);
+    React.createElement.mockReturnValueOnce(mockReactElement);
 
     r(function (h, t) {
       h('ol');
@@ -110,11 +110,11 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][2]).toBe('list item');
     expect(React.createElement.mock.calls[1][0]).toBe('ol');
     expect(React.createElement.mock.calls[1][1]).toBe(null);
-    expect(React.createElement.mock.calls[1][2]).toBe(mockReturn);
+    expect(React.createElement.mock.calls[1][2]).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with a complex element hierarchy', function () {
-    React.createElement.mockReturnValue(mockReturn);
+    React.createElement.mockReturnValue(mockReactElement);
 
     r(function (h, t) {
       h('div');
@@ -145,8 +145,8 @@ describe('r', function () {
 
     expect(React.createElement.mock.calls[2][0]).toBe('ol');
     expect(React.createElement.mock.calls[2][1]).toBe(null);
-    expect(React.createElement.mock.calls[2][2]).toBe(mockReturn);
-    expect(React.createElement.mock.calls[2][3]).toBe(mockReturn);
+    expect(React.createElement.mock.calls[2][2]).toBe(mockReactElement);
+    expect(React.createElement.mock.calls[2][3]).toBe(mockReactElement);
 
     expect(React.createElement.mock.calls[3][0]).toBe('span');
     expect(React.createElement.mock.calls[3][1]).toBe(null);
@@ -158,13 +158,44 @@ describe('r', function () {
 
     expect(React.createElement.mock.calls[5][0]).toBe('h1');
     expect(React.createElement.mock.calls[5][1]).toBe(null);
-    expect(React.createElement.mock.calls[5][2]).toBe(mockReturn);
-    expect(React.createElement.mock.calls[5][3]).toBe(mockReturn);
+    expect(React.createElement.mock.calls[5][2]).toBe(mockReactElement);
+    expect(React.createElement.mock.calls[5][3]).toBe(mockReactElement);
 
     expect(React.createElement.mock.calls[6][0]).toBe('div');
     expect(React.createElement.mock.calls[6][1]).toBe(null);
     expect(React.createElement.mock.calls[6][2]).toBe('some text');
-    expect(React.createElement.mock.calls[6][3]).toBe(mockReturn);
-    expect(React.createElement.mock.calls[6][4]).toBe(mockReturn);
+    expect(React.createElement.mock.calls[6][3]).toBe(mockReactElement);
+    expect(React.createElement.mock.calls[6][4]).toBe(mockReactElement);
+  });
+
+  it('should accept reactElements and submit them as self closing elements', function () {
+
+    r(function (h, t) {
+      h('div', mockProps);
+        h(mockReactElement);
+        t('some text');
+      h('/div');
+    });
+
+    expect(React.createElement.mock.calls[0][0]).toBe('div');
+    expect(React.createElement.mock.calls[0][1]).toBe(mockProps);
+    expect(React.createElement.mock.calls[0][2]).toBe(mockReactElement);
+    expect(React.createElement.mock.calls[0][3]).toBe('some text');
+  });
+
+  it('should accept arrays of reactElements and submit them as self closing arrays of elements', function () {
+    var mockElementArray = [mockReactElement, mockReactElement];
+
+    r(function (h, t) {
+      h('div', mockProps);
+        h(mockElementArray);
+        t('some text');
+      h('/div');
+    });
+
+    expect(React.createElement.mock.calls[0][0]).toBe('div');
+    expect(React.createElement.mock.calls[0][1]).toBe(mockProps);
+    expect(React.createElement.mock.calls[0][2]).toBe(mockElementArray);
+    expect(React.createElement.mock.calls[0][3]).toBe('some text');
   });
 });

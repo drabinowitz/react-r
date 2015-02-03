@@ -8,6 +8,11 @@ var INVALID_MULTIPLE_CLOSING_TAGS = 'attempted to pass in multiple closing tags:
 var INVALID_TAG = 'tag: "%s" is not a valid tag';
 var INVALID_NUMBER_OF_ARGUMENTS = 'there are multiple outermost r.compose tags. r.compose needs to return a single outermost tag same as with the normal React class render method return';
 var INVALID_CLOSING_TAG_COUNT = 'There are not enough closing tags for this render composition';
+var INVALID_REACT_ELEMENT_PROPS = 'attempted to pass in props to a React element that has already been created, props should have been passed in when the element was created initially';
+var INVALID_REACT_ELEMENT_CLOSING_TAG = 'attempted to add a closing tag to a React element that has already been created, since the element has already been created it is self-closing and thus a closing tag is unnecessary';
+var INVALID_ARRAY_OF_ELEMENTS_PROPS = 'attempted to pass in props to an array of React elements, props should have been passed in when the elements were created initially';
+var INVALID_ARRAY_OF_ELEMENTS_CLOSING_TAG = 'attempted to add a closing tag to an array of React elements, since the elements have already been created they are self-closing and thus a closing tag is unnecessary';
+var INVALID_OUTERMOST_ARRAY_OF_ELEMENTS = 'attempted to compose an outermost array of elements. We can only return a single React element. Instead of returning an array, pass the array in as a child to a single element such as a div';
 
 //r FUNCTION: accepts a callback to build the component composition and then returns the output of that composition
 //@param composition FUNCTION REQUIRED: callback which will define the composition of react components, this is the user's entrypoint into React-r
@@ -37,17 +42,18 @@ var h = function (el, propsOrClosingTag, elClosingTag) {
   var props = null;
   var closingTag;
   var trimmedEl;
+  var isReactElement = false;
+  var isArray = false;
 
   //handle propsOrClosingTag, if string then it should be the closing tag for el
   if (typeof propsOrClosingTag === 'string') {
     //if propsOrClosingTag is a valid closing tag then use it
     checkIfValidClosingTag(propsOrClosingTag, true);
     closingTag = propsOrClosingTag;
+
   //if object then it will be the props for the el
   } else if (propsOrClosingTag && typeof propsOrClosingTag === 'object') {
-
     props = propsOrClosingTag;
-
   }
 
   //handle elClosingTag, if it is defined then it should be the closing tag for el
@@ -66,23 +72,42 @@ var h = function (el, propsOrClosingTag, elClosingTag) {
     if (trimmedEl[0] === '/') {
       invariant(!closingTag, INVALID_MULTIPLE_CLOSING_TAGS, closingTag, el);
       invariant(!props, INVALID_CLOSING_TAG_PROPS, el);
-
+      //since this is a closing tag there is no element to pass in
       closingTag = el;
       el = null;
+
     //if self closing tag then closing tag is el, props can be defined but closing tag should not be
     } else if (trimmedEl[trimmedEl.length - 1] === '/') {
       invariant(!closingTag, INVALID_MULTIPLE_CLOSING_TAGS, closingTag, el);
-
+      //since this is a self closing tag the element should be the tag trimmed of its closing /
       closingTag = el;
       el = trimmedEl.substr(0, trimmedEl.length - 1).trim();
     }
+
+  //if el is already a react element, props and closing tag should not be defined
+  } else if (React.isValidElement(el)) {
+    invariant(!closingTag, INVALID_MULTIPLE_CLOSING_TAGS);
+    invariant(!props, INVALID_CLOSING_TAG_PROPS);
+    //set boolean to indicate this is a React element
+    isReactElement = true;
+    closingTag = '/';
+
+  //if el is an array, props and closing tag should not be defined
+  } else if(Array.isArray(el)) {
+    invariant(!closingTag, INVALID_ARRAY_OF_ELEMENTS_CLOSING_TAG);
+    invariant(!props, INVALID_ARRAY_OF_ELEMENTS_PROPS);
+    //set boolean to indicate this is an array of React elements
+    isArray = true;
+    closingTag = '/';
   }
 
   //push the assembled el into our components array
   components.push({
     el: el,
     props: props,
-    closingTag: closingTag
+    closingTag: closingTag,
+    isReactElement: isReactElement,
+    isArray: isArray
   });
 };
 
@@ -114,10 +139,8 @@ var compose = function () {
     children = [];
   }
 
-  var children;
   var componentsLength = components.length;
-  var reactElement;
-  var elementOrString;
+  var children, reactElement, elementOrString;
   while (currentIndex < componentsLength) {
     elementOrString = components[currentIndex];
     currentIndex++;
@@ -129,9 +152,17 @@ var compose = function () {
 
     } else if (elementOrString.el && elementOrString.closingTag) {
 
-      reactElement = React.createElement(elementOrString.el, elementOrString.props);
+      if (elementOrString.isArray || elementOrString.isReactElement) {
+        reactElement = elementOrString.el;
+      } else {
+        reactElement = React.createElement(elementOrString.el, elementOrString.props);
+      }
+
       if (setOutermostInvocation) {
         composeCleanup(componentsLength);
+        if (elementOrString.isArray) {
+          invariant(INVALID_OUTERMOST_ARRAY_OF_ELEMENTS);
+        }
         return reactElement;
       } else {
         children.push(reactElement);
