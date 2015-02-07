@@ -17,8 +17,8 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with a single element', function () {
-    r(function (h, t) {
-      h('br /');
+    r(function ($, y$, t) {
+      $('br', y$);
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('br');
@@ -26,10 +26,10 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with an element with text', function () {
-    r(function (h, t) {
-      h('h1');
+    r(function ($, y$, t) {
+      $('h1');
         t('hello, world');
-      h('/h1');
+      y$('h1');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('h1');
@@ -38,8 +38,8 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with an element with props', function () {
-    r(function (h, t) {
-      h('div', mockProps, '/');
+    r(function ($, y$, t) {
+      $('div', mockProps, y$);
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('div');
@@ -47,10 +47,10 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with an element with text and props', function () {
-    r(function (h, t) {
-      h('p', mockProps);
+    r(function ($, y$, t) {
+      $('p', mockProps);
         t('what cool syntax');
-      h('/p');
+      y$('p');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('p');
@@ -59,24 +59,24 @@ describe('r', function () {
   });
 
   it('should invoke React.createElement with a custom element', function () {
-    r(function (h, t) {
-      h(mockReactClass, '/');
+    r(function ($, y$, t) {
+      $(mockReactClass, y$);
     });
 
-    r(function (h, t) {
-      h(mockReactClass, mockProps, '/');
+    r(function ($, y$, t) {
+      $(mockReactClass, mockProps, y$);
     });
 
-    r(function (h, t) {
-      h(mockReactClass);
+    r(function ($, y$, t) {
+      $(mockReactClass);
         t('inner child');
-      h('/mockReactClass');
+      y$(mockReactClass);
     });
 
-    r(function (h, t) {
-      h(mockReactClass, mockProps);
+    r(function ($, y$, t) {
+      $(mockReactClass, mockProps);
         t('inner child');
-      h('/mockReactClass');
+      y$(mockReactClass);
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe(mockReactClass);
@@ -97,12 +97,12 @@ describe('r', function () {
   it('should invoke React.createElement with an element with a child element', function () {
     React.createElement.mockReturnValueOnce(mockReactElement);
 
-    r(function (h, t) {
-      h('ol');
-        h('li', mockProps);
+    r(function ($, y$, t) {
+      $('ol');
+        $('li', mockProps);
           t('list item');
-        h('/li');
-      h('/ol');
+        y$('li');
+      y$('ol');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('li');
@@ -116,24 +116,24 @@ describe('r', function () {
   it('should invoke React.createElement with a complex element hierarchy', function () {
     React.createElement.mockReturnValue(mockReactElement);
 
-    r(function (h, t) {
-      h('div');
+    r(function ($, y$, t) {
+      $('div');
         t('some text');
-        h('ol');
-          h('li', mockProps);
+        $('ol');
+          $('li', mockProps);
             t('list item');
-          h('/li');
-          h(mockReactClass, mockProps, '/');
-        h('/ol');
-        h('h1');
-          h('span');
+          y$('li');
+          $(mockReactClass, mockProps, y$);
+        y$('ol');
+        $('h1');
+          $('span');
             t('some text');
-          h('/span');
-          h(mockReactClass);
+          y$('span');
+          $(mockReactClass);
             t('mock text');
-          h('/mockReactClass');
-        h('/h1');
-      h('/div');
+          y$(mockReactClass);
+        y$('h1');
+      y$('div');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('li');
@@ -170,11 +170,11 @@ describe('r', function () {
 
   it('should accept reactElements and submit them as self closing elements', function () {
 
-    r(function (h, t) {
-      h('div', mockProps);
-        h(mockReactElement);
+    r(function ($, y$, t) {
+      $('div', mockProps);
+        $(mockReactElement);
         t('some text');
-      h('/div');
+      y$('div');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('div');
@@ -186,11 +186,11 @@ describe('r', function () {
   it('should accept arrays of reactElements and submit them as self closing arrays of elements', function () {
     var mockElementArray = [mockReactElement, mockReactElement];
 
-    r(function (h, t) {
-      h('div', mockProps);
-        h(mockElementArray);
+    r(function ($, y$, t) {
+      $('div', mockProps);
+        $(mockElementArray);
         t('some text');
-      h('/div');
+      y$('div');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('div');
