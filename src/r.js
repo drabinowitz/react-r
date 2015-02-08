@@ -10,19 +10,17 @@ var invariant = function (assertion, errorMessage, replacements) {
 
 //error messages
 var INVALID_CLOSING_TAG = 'tag: "%s" is not a valid closing tag';
-var INVALID_CLOSING_TAG_PROPS = 'tag: "%s" cannot have props passed into it';
-var INVALID_MULTIPLE_CLOSING_TAGS = 'attempted to pass in multiple closing tags: "%s" to el: "%s"';
+var INVALID_CLOSING_TAG_PROPS = 'closing tag for: "%s" cannot have props passed into it';
+var INVALID_MULTIPLE_CLOSING_TAGS = 'attempted to pass in multiple closing tags to el: "%s"';
 var INVALID_TAG = 'tag: "%s" is not a valid tag';
 var INVALID_NUMBER_OF_ARGUMENTS = 'there are multiple outermost tags. r needs to return a single outermost tag same as with the normal React class render method return';
 var INVALID_CLOSING_TAG_COUNT_TOO_FEW = 'there are not enough closing tags for this render composition';
 var INVALID_CLOSING_TAG_COUNT_TOO_MANY = 'there are too many closing tags for this render composition: "%s"';
 var INVALID_REACT_ELEMENT_PROPS = 'attempted to pass in props to a React element that has already been created, props should have been passed in when the element was created initially';
-var INVALID_REACT_ELEMENT_CLOSING_TAG = 'attempted to add a closing tag to a React element that has already been created, since the element has already been created it is self-closing and thus a closing tag is unnecessary';
 var INVALID_ARRAY_OF_ELEMENTS_PROPS = 'attempted to pass in props to an array of React elements, props should have been passed in when the elements were created initially';
-var INVALID_ARRAY_OF_ELEMENTS_CLOSING_TAG = 'attempted to add a closing tag to an array of React elements, since the elements have already been created they are self-closing and thus a closing tag is unnecessary';
 var INVALID_OUTERMOST_ARRAY_OF_ELEMENTS = 'attempted to compose an outermost array of elements. We can only return a single React element. Instead of returning an array, pass the array in as a child to a single element such as a div';
-var INVALID_PROPS_OR_CLOSING_TAG = 'attempted to pass an invalid second argument to element creating function (first argument passed into r callback): "%s". Second argument must either be an object representing the properties of the element or the element closing function (second argument passed into r callback)';
-var INVALID_CLOSING_TAG = 'attempted to pass an invalid closing argument to element creator function (first argument passed into r callback): "%s". Closing argument must be the element closing function (second argument passed into r callback)';
+var INVALID_PROPS_OR_CLOSING_TAG = 'attempted to pass invalid props or closing tag to element: "%s". Second argument must either be an object representing the properties of the element or the element closer';
+var INVALID_CLOSING_TAG = 'attempted to pass invalid closing tag to element: "%s". Closing argument must be the element closer';
 var INVALID_MISMATCHED_TAGS = 'the opening tag: "%s" does not match with the closing tag: "%s"';
 
 //r FUNCTION: accepts a callback to build the component composition and then returns the output of that composition
@@ -38,7 +36,7 @@ var r = function (composition) {
 var elComposition = [];
 
 var addArrayToCurrentElCompositionLayer = function (arrayOfEls) {
-  invariant(elComposition.length !== 1, INVALID_OUTERMOST_ARRAY_OF_ELEMENTS);
+  invariant(elComposition.length > 1, INVALID_OUTERMOST_ARRAY_OF_ELEMENTS);
   addToCurrentElCompositionLayer(arrayOfEls);
 };
 
@@ -62,7 +60,7 @@ var $ = function (el, propsOrClosingTag, elClosingTag) {
 
   //handle propsOrClosingTag, if string then it should be the closing tag for el
   if (propsOrClosingTag) {
-    invariant(typeof propsOrClosingTag === 'object' || typeof propsOrClosingTag === 'function', INVALID_PROPS_OR_CLOSING_TAG, propsOrClosingTag);
+    invariant(typeof propsOrClosingTag === 'object' || typeof propsOrClosingTag === 'function', INVALID_PROPS_OR_CLOSING_TAG, el);
     if (propsOrClosingTag.__isReactRClosingTagFunc__) {
       closingTag = propsOrClosingTag;
     } else {
@@ -72,8 +70,8 @@ var $ = function (el, propsOrClosingTag, elClosingTag) {
 
   //handle elClosingTag, if it is defined then it should be the closing tag for el
   if (elClosingTag) {
-    invariant(!closingTag, INVALID_MULTIPLE_CLOSING_TAGS, closingTag, el);
-    invariant(elClosingTag.__isReactRClosingTagFunc__, INVALID_CLOSING_TAG);
+    invariant(!closingTag, INVALID_MULTIPLE_CLOSING_TAGS, el);
+    invariant(elClosingTag.__isReactRClosingTagFunc__, INVALID_CLOSING_TAG, el);
     closingTag = elClosingTag;
   }
 

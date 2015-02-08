@@ -287,4 +287,54 @@ describe('r', function () {
       });
     }).toThrow(new Error('Invariant Violation: there are multiple outermost tags. r needs to return a single outermost tag same as with the normal React class render method return'));
   });
+
+  it('should throw an error when attempting to pass in properties to a react element that has already been created', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $(mockReactElement, mockProps);
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to pass in props to a React element that has already been created, props should have been passed in when the element was created initially'));
+  });
+
+  it('should throw an error when attempting to pass in properties to an array of already created react elements', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div');
+          $([mockReactElement], mockProps);
+        y$('div');
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to pass in props to an array of React elements, props should have been passed in when the elements were created initially'));
+  });
+
+  it('should throw an error when attempting to compose an outermost array of react elements', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $([mockReactElement]);
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to compose an outermost array of elements. We can only return a single React element. Instead of returning an array, pass the array in as a child to a single element such as a div'));
+  });
+
+  it('should throw an error when passing in invalid props', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div', 'some invalid props', y$);
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to pass invalid props or closing tag to element: "div". Second argument must either be an object representing the properties of the element or the element closer'));
+  });
+
+  it('should throw an error when passing in an invalid closing tag', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div', mockProps, {});
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to pass invalid closing tag to element: "div". Closing argument must be the element closer'));
+  });
+
+  it('should throw an error when passing in multiple closing tags', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div', y$, y$);
+      });
+    }).toThrow(new Error('Invariant Violation: attempted to pass in multiple closing tags to el: "div"'));
+  });
 });
