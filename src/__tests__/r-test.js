@@ -16,27 +16,32 @@ describe('r', function () {
     mockProps = {};
   });
 
-  it('should invoke React.createElement with a single element', function () {
-    r(function ($, y$, t) {
+  it('should invoke and return React.createElement with a single element', function () {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $('br', y$);
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('br');
     expect(React.createElement.mock.calls[0][1]).toBe(null);
+    expect(result).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with an element with no children', function () {
-    r(function ($, y$, t) {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $('h1');
       y$('h1');
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('h1');
     expect(React.createElement.mock.calls[0][1]).toBe(null);
+    expect(result).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with an element with text', function () {
-    r(function ($, y$, t) {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $('h1');
         t('hello, world');
       y$('h1');
@@ -45,19 +50,23 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][0]).toBe('h1');
     expect(React.createElement.mock.calls[0][1]).toBe(null);
     expect(React.createElement.mock.calls[0][2]).toBe('hello, world');
+    expect(result).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with an element with props', function () {
-    r(function ($, y$, t) {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $('div', mockProps, y$);
     });
 
     expect(React.createElement.mock.calls[0][0]).toBe('div');
     expect(React.createElement.mock.calls[0][1]).toBe(mockProps);
+    expect(result).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with an element with text and props', function () {
-    r(function ($, y$, t) {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $('p', mockProps);
         t('what cool syntax');
       y$('p');
@@ -66,12 +75,15 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][0]).toBe('p');
     expect(React.createElement.mock.calls[0][1]).toBe(mockProps);
     expect(React.createElement.mock.calls[0][2]).toBe('what cool syntax');
+    expect(result).toBe(mockReactElement);
   });
 
   it('should invoke React.createElement with a custom element', function () {
-    r(function ($, y$, t) {
+    React.createElement.mockReturnValue(mockReactElement);
+    var result = r(function ($, y$, t) {
       $(mockReactClass, y$);
     });
+    expect(result).toBe(mockReactElement);
 
     r(function ($, y$, t) {
       $(mockReactClass, mockProps, y$);
@@ -209,7 +221,7 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][3]).toBe('some text');
   });
 
-  it('should throw an error if element does not have enough closing tags', function () {
+  it('should throw an error if composition does not have enough closing tags', function () {
     expect(function () {
       r(function ($, y$, t) {
         $('div');
@@ -220,17 +232,59 @@ describe('r', function () {
       r(function ($, y$, t) {
         $('div');
           $('h1');
+            t('text');
           y$('h1');
       });
     }).toThrow(new Error('Invariant Violation: there are not enough closing tags for this render composition'));
   });
 
-  it('should throw an error if element has to many closing tags', function () {
+  it('should throw an error if composition has too many closing tags', function () {
     expect(function () {
       r(function ($, y$, t) {
         $('h3', y$);
         y$('h3');
       });
-    }).toThrow(new Error('there are too many closing tags for this render composition: "h3"'));
+    }).toThrow(new Error('Invariant Violation: there are too many closing tags for this render composition: "h3"'));
+
+    expect(function () {
+      r(function ($, y$, t) {
+        $('h3');
+          $('div', y$);
+        y$('h3');
+        y$('h3');
+      });
+    }).toThrow(new Error('Invariant Violation: there are too many closing tags for this render composition: "h3"'));
+  });
+
+  it('should throw an error if composition has mismatched tags', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div');
+          $('h1');
+          y$('h2');
+        y$('div');
+      });
+    }).toThrow(new Error('Invariant Violation: the opening tag: "h1" does not match with the closing tag: "h2"'));
+
+    expect(function () {
+      r(function ($, y$, t) {
+        $('h1');
+          $('h1', y$);
+        y$('h2');
+      });
+    }).toThrow(new Error('Invariant Violation: the opening tag: "h1" does not match with the closing tag: "h2"'));
+  });
+
+  it('should throw an error if there are multiple outermost tags', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div');
+          t('some text');
+        y$('div');
+        $('div');
+          t('some text');
+        y$('div');
+      });
+    }).toThrow(new Error('Invariant Violation: there are multiple outermost tags. r needs to return a single outermost tag same as with the normal React class render method return'));
   });
 });

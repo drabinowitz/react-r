@@ -1,5 +1,12 @@
 var React = require('react');
-var invariant = require('react/lib/invariant');
+var invariantError = require('react/lib/invariant');
+
+var invariant = function (assertion, errorMessage, replacements) {
+  if (!assertion) {
+    elComposition = [];
+    invariantError.apply(null, arguments);
+  }
+};
 
 //error messages
 var INVALID_CLOSING_TAG = 'tag: "%s" is not a valid closing tag';
@@ -37,10 +44,10 @@ var addArrayToCurrentElCompositionLayer = function (arrayOfEls) {
 
 var addToCurrentElCompositionLayer = function (reactEl) {
   var layer = elComposition[elComposition.length - 1];
-  if (elComposition.length) {
+  if (elComposition.length > 1) {
     layer.push(reactEl);
   } else {
-    invariant(!layer, INVALID_NUMBER_OF_ARGUMENTS);
+    invariant(elComposition.length !== 1, INVALID_NUMBER_OF_ARGUMENTS);
     elComposition.push(reactEl);
   }
 };
@@ -106,7 +113,7 @@ var $ = function (el, propsOrClosingTag, elClosingTag) {
 };
 
 var y$ = function (closingEl) {
-  invariant(elComposition.length !== 0, INVALID_CLOSING_TAG_COUNT_TOO_MANY, closingEl);
+  invariant(elComposition.length > 1, INVALID_CLOSING_TAG_COUNT_TOO_MANY, closingEl);
   var children = elComposition.pop();
   var elList = elComposition[elComposition.length - 1];
   var elToClose;
