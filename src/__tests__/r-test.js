@@ -25,6 +25,16 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][1]).toBe(null);
   });
 
+  it('should invoke React.createElement with an element with no children', function () {
+    r(function ($, y$, t) {
+      $('h1');
+      y$('h1');
+    });
+
+    expect(React.createElement.mock.calls[0][0]).toBe('h1');
+    expect(React.createElement.mock.calls[0][1]).toBe(null);
+  });
+
   it('should invoke React.createElement with an element with text', function () {
     r(function ($, y$, t) {
       $('h1');
@@ -197,5 +207,30 @@ describe('r', function () {
     expect(React.createElement.mock.calls[0][1]).toBe(mockProps);
     expect(React.createElement.mock.calls[0][2]).toBe(mockElementArray);
     expect(React.createElement.mock.calls[0][3]).toBe('some text');
+  });
+
+  it('should throw an error if element does not have enough closing tags', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div');
+      });
+    }).toThrow(new Error('Invariant Violation: there are not enough closing tags for this render composition'));
+
+    expect(function () {
+      r(function ($, y$, t) {
+        $('div');
+          $('h1');
+          y$('h1');
+      });
+    }).toThrow(new Error('Invariant Violation: there are not enough closing tags for this render composition'));
+  });
+
+  it('should throw an error if element has to many closing tags', function () {
+    expect(function () {
+      r(function ($, y$, t) {
+        $('h3', y$);
+        y$('h3');
+      });
+    }).toThrow(new Error('there are too many closing tags for this render composition: "h3"'));
   });
 });
