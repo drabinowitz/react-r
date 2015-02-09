@@ -1,10 +1,10 @@
 # React-r
 
-'A library for writing JSX-like syntax in JavaScript
+>A library for writing JSX-like syntax in JavaScript
 
 ## Summary
 
-React is awesome, virtual DOM is awesome, JSX is less awesome. It's nice
+React is awesome, the virtual DOM is awesome, JSX is less awesome. It's a nice way of describing HTML elements in JavaScript, but it means learning a whole new language and adding another compiler to your JS files. In terms of future proofing it's a lot of weight to take on for a cleaner syntax. React-r provides a syntax for writing JavaScript that looks and acts a lot like JSX but without the baggage of a new language to compile.
 
 ## Installation
 
@@ -42,7 +42,7 @@ var HelloWorld = React.createClass({
 module.exports = HelloWorld;
 ```
 
-Alright I know it looks a little weird but hear me out, I use $ here because it's a clean divider for an element but you can use whatever you want and there is basically a parallel between $ and an opening element tag and y$ and a closing element tag
+Alright I know it looks a little weird but hear me out, I use `$` here because it's a clean divider for an element but you can use whatever you want and there is basically a parallel between `$` and an opening element tag and `y$` and a closing element tag
 
 Which means we can write stuff like
 

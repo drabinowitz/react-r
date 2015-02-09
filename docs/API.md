@@ -2,10 +2,10 @@
 
 ## Table of Contents
 
-1. r(composeCallback)
-2. $(el, propsOrClosingTag, closingTag)
-3. y$(el)
-4. t(text)
+1. [r(composeCallback)](#rcomposecallback)
+2. [$(elementToCreate, propsOrClosingTag, closingTag)](#elementtocreate-propsorclosingtag-closingtag)
+3. [y$(elementToClose)](#yelementtoclose)
+4. [t(textBody)](#ttextbody)
 
 ## Implementation
 
@@ -19,9 +19,9 @@ r(function ($, y$, t) {
 });
 ```
 
-@param `$` FUNCTION REQUIRED: The opening tag for the element. This receives the element class to create and (optionally) props and a closing tag.
-@param `y$` FUNCTION REQUIRED: The closing tag for the element. This is a function which takes an element to close. Alternatively, it can be passed in to self-closing elements.
-@param `t` FUNCTION REQUIRED: The text content of an element. This adds a text element as a child of the element to create.
+1. @param `$` FUNCTION REQUIRED: The opening tag for the element. This receives the element class to create and (optionally) props and a closing tag.
+2. @param `y$` FUNCTION REQUIRED: The closing tag for the element. This is a function which takes an element to close. Alternatively, it can be passed in to self-closing elements.
+3. @param `t` FUNCTION REQUIRED: The text content of an element. This adds a text element as a child of the element to create.
 
 ### $(elementToCreate, propsOrClosingTag, closingTag)
 
@@ -34,9 +34,9 @@ $(el);
   //child elements
 y$(el);
 ```
-@param `el` STRING or OBJECT REQUIRED: The element to create. This can either be a string representing the React DOM element to be created or a React Composite Class (result of calling `React.createClass`) to be created.
-@param `props` OBJECT OPTIONAL: An object representing the props of the element to create.
-@param `y$` FUNCTION OPTIONAL: The element to close.
+1. @param `el` STRING or OBJECT REQUIRED: The element to create. This can either be a string representing the React DOM element to be created or a React Composite Class (result of calling `React.createClass`) to be created.
+2. @param `props` OBJECT OPTIONAL: An object representing the props of the element to create.
+3. @param `y$` FUNCTION OPTIONAL: The element to close.
 
 ### y$(elementToClose)
 
@@ -48,9 +48,9 @@ $(el);
 y$(el);
 ```
 
-@param `el` STRING or OBJECT REQUIRED: The element to close. This can either be a string representing the React DOM element to be closed or a React Composite Class (result of calling `React.createClass`) to be closed. This element must match with the last opened React element.
+1. @param `el` STRING or OBJECT REQUIRED: The element to close. This can either be a string representing the React DOM element to be closed or a React Composite Class (result of calling `React.createClass`) to be closed. This element must match with the last opened React element.
 
-### t(textElement)
+### t(textBody)
 
 Accepts a body of text and will add it as a child of the currently open element.
 
@@ -60,4 +60,4 @@ $(el);
 y$(el);
 ```
 
-@param `text` STRING REQUIRED: The body of text to be passed in as child of the open React element.
+1. @param `text` STRING REQUIRED: The body of text to be passed in as child of the open React element.
